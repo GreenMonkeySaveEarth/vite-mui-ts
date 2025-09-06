@@ -71,37 +71,55 @@ const ClinicalNotesPage: React.FC = () => {
 
 	// Memoized ListItem component
 	const MemoizedNoteItem = memo(({ note }: { note: ClinicalNote }) => (
-		<ListItem divider>
+		<ListItem
+			divider
+			component="article"
+			aria-labelledby={`patient-name-${note.id}`}
+			tabIndex={0}
+		>
 			<ListItemText
+				id={`patient-name-${note.id}`}
 				primary={`${note.patientName} (ID: ${note.id})`}
+				primaryTypographyProps={{ component: "h3" }}
 				secondary={
 					<>
-						{note.noteText}
+						<span id={`note-text-${note.id}`}>{note.noteText}</span>
 						<br />
-						<Typography variant="caption" color="text.secondary">
+						<Typography
+							variant="caption"
+							color="text.secondary"
+							component="time"
+							dateTime={note.createdAt}
+							aria-label={`Created on ${formatDate(note.createdAt)}`}
+						>
 							{formatDate(note.createdAt)}
 						</Typography>
 					</>
 				}
+				aria-describedby={`note-text-${note.id}`}
 			/>
 		</ListItem>
 	));
 
 	return (
-		<Container maxWidth="md" sx={{ my: 4 }}>
-			<Typography variant="h4" gutterBottom>
+		<Container maxWidth="md" sx={{ my: 4 }} component="main">
+			<Typography variant="h1" gutterBottom fontSize="2.125rem" component="h1" id="page-title">
 				Clinical Notes
 			</Typography>
 			{loading ? (
-				<CircularProgress />
+				<Box role="status" aria-live="assertive" aria-label="Loading clinical notes" display="flex" justifyContent="center">
+					<CircularProgress aria-label="Loading" />
+				</Box>
 			) : error ? (
-				<Typography color="error">{error}</Typography>
+				<Typography color="error" role="alert" aria-live="assertive">{error}</Typography>
 			) : (
 				<>
-					<Box sx={{ mb: 3 }}>
+					<Box sx={{ mb: 3 }} role="search">
 						<TextField
 							fullWidth
 							variant="outlined"
+							id="patient-name-search"
+							label="Search by patient name"
 							placeholder="Search by patient name"
 							value={searchQuery}
 							onChange={(e) => {
@@ -111,32 +129,68 @@ const ClinicalNotesPage: React.FC = () => {
 							InputProps={{
 								startAdornment: (
 									<InputAdornment position="start">
-										<SearchIcon />
+										<SearchIcon aria-hidden="true" />
 									</InputAdornment>
 								),
 							}}
+							aria-label="Search by patient name"
+							InputLabelProps={{
+								shrink: true,
+							}}
 						/>
 					</Box>
-					<List>
-						{filteredAndPaginatedNotes.notes.map((note) => (
-							<MemoizedNoteItem key={note.id} note={note} />
-						))}
-					</List>
-					<Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 2 }}>
+					<Box component="section" aria-label="Clinical notes list">
+						<List
+							aria-label="Clinical notes"
+							aria-live="polite"
+							aria-busy={loading}
+						>
+							{filteredAndPaginatedNotes.notes.length > 0 ? (
+								filteredAndPaginatedNotes.notes.map((note) => (
+									<MemoizedNoteItem key={note.id} note={note} />
+								))
+							) : (
+								<ListItem>
+									<ListItemText
+										primary="No matching notes found"
+										aria-live="assertive"
+									/>
+								</ListItem>
+							)}
+						</List>
+					</Box>
+					<Stack
+						direction="row"
+						spacing={2}
+						justifyContent="center"
+						sx={{ mt: 2 }}
+						component="nav"
+						aria-label="Pagination navigation"
+					>
 						<Button
 							variant="contained"
 							onClick={() => setPage(p => Math.max(p - 1, 0))}
 							disabled={page === 0}
+							aria-label="Go to previous page"
+							aria-disabled={page === 0}
 						>
 							Previous
 						</Button>
-						<Typography variant="body2" sx={{ alignSelf: 'center' }}>
+						<Typography
+							variant="body2"
+							sx={{ alignSelf: 'center' }}
+							role="status"
+							aria-live="polite"
+							id="pagination-status"
+						>
 							Page {page + 1} of {Math.ceil(filteredAndPaginatedNotes.totalCount / PAGE_SIZE)}
 						</Typography>
 						<Button
 							variant="contained"
 							onClick={() => setPage(p => (p + 1 < Math.ceil(filteredAndPaginatedNotes.totalCount / PAGE_SIZE) ? p + 1 : p))}
 							disabled={page + 1 >= Math.ceil(filteredAndPaginatedNotes.totalCount / PAGE_SIZE)}
+							aria-label="Go to next page"
+							aria-disabled={page + 1 >= Math.ceil(filteredAndPaginatedNotes.totalCount / PAGE_SIZE)}
 						>
 							Next
 						</Button>
