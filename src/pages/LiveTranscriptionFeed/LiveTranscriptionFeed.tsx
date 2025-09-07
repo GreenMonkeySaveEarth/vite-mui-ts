@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Container, Typography, Box, TextareaAutosize, CircularProgress } from '@mui/material';
 
 const LiveTranscriptionFeed: React.FC = () => {
-	const [transcription, setTranscription] = useState<string[]>([]);
+	const [finalCaptions, setFinalCaptions] = useState<string[]>([]);
+	const [partialCaption, setPartialCaption] = useState<string>('');
 	const [isRecording, setIsRecording] = useState(true);
 	const [isConnected, setIsConnected] = useState(false);
 	const [latency, setLatency] = useState<number | null>(null);
@@ -16,10 +17,10 @@ const LiveTranscriptionFeed: React.FC = () => {
 		return () => {
 			if (timeout) return;
 			timeout = setTimeout(() => {
-				setTranscription((prev) => [...prev, ...bufferRef.current]);
+				setFinalCaptions((prev) => [...prev, ...bufferRef.current]);
 				bufferRef.current = [];
 				clearTimeout(timeout);
-			}, 5000); // Update every 5 seconds
+			}, 100); // Update every 100ms
 		};
 	}, []);
 
@@ -34,9 +35,17 @@ const LiveTranscriptionFeed: React.FC = () => {
 			};
 
 			socket.onmessage = (event) => {
-				const data = event.data;
-				bufferRef.current.push(data);
-				throttledUpdate();
+				const data = JSON.parse(event.data);
+
+				if (data.isFinal) {
+					// Final caption
+					bufferRef.current.push(data.text);
+					throttledUpdate();
+				} else {
+					// Partial caption
+					setPartialCaption(data.text);
+				}
+
 				setIsRecording(false);
 
 				// Measure latency
@@ -100,7 +109,7 @@ const LiveTranscriptionFeed: React.FC = () => {
 			<TextareaAutosize
 				minRows={10}
 				style={{ width: '100%', fontSize: '1rem', padding: '8px' }}
-				value={transcription.join(' ')}
+				value={`${finalCaptions.join(' ')} ${partialCaption}`}
 				placeholder="Live transcription will appear here..."
 				readOnly
 			/>
