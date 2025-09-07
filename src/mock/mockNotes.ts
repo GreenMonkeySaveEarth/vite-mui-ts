@@ -1,4 +1,4 @@
-import { ClinicalNote } from '../pages/ClinicalNotesPage';
+import { ClinicalNote } from '../pages/ClinicalNotes/types';
 
 function randomName(idx: number) {
   const firstNames = ['John', 'Jane', 'Alice', 'Bob', 'Carol', 'David', 'Eve', 'Frank', 'Grace', 'Hank'];

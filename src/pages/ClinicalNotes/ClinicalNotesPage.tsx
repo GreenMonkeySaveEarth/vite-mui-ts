@@ -1,14 +1,9 @@
-import React, { useEffect, useState, useMemo, memo } from 'react';
-import { Container, Typography, CircularProgress, List, ListItem, ListItemText, Button, Stack, Box, TextField, InputAdornment } from '@mui/material';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Container, Typography, CircularProgress, List, Button, Stack, Box, TextField, InputAdornment, ListItem, ListItemText } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { mockNotes } from '../mock/mockNotes';
-
-export interface ClinicalNote {
-	id: string;
-	patientName: string;
-	noteText: string;
-	createdAt: string;
-}
+import { mockNotes } from '../../mock/mockNotes';
+import { ClinicalNote } from './types';
+import { MemoizedNoteItem } from './NoteItem';
 
 const ClinicalNotesPage: React.FC = () => {
 	const PAGE_SIZE = 10;
@@ -39,13 +34,6 @@ const ClinicalNotesPage: React.FC = () => {
 		};
 		fetchNotes();
 	}, []);
-	// Format date helper
-	const formatDate = (dateString: string) => {
-		const date = new Date(dateString);
-		return date.toLocaleString('en-US', {
-			month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false
-		});
-	};
 
 	// Memoize filtered and paginated notes
 	const filteredAndPaginatedNotes = useMemo(() => {
@@ -68,38 +56,6 @@ const ClinicalNotesPage: React.FC = () => {
 			totalCount: filtered.length
 		};
 	}, [notes, page, searchQuery]);
-
-	// Memoized ListItem component
-	const MemoizedNoteItem = memo(({ note }: { note: ClinicalNote }) => (
-		<ListItem
-			divider
-			component="article"
-			aria-labelledby={`patient-name-${note.id}`}
-			tabIndex={0}
-		>
-			<ListItemText
-				id={`patient-name-${note.id}`}
-				primary={`${note.patientName} (ID: ${note.id})`}
-				primaryTypographyProps={{ component: "h3" }}
-				secondary={
-					<>
-						<span id={`note-text-${note.id}`}>{note.noteText}</span>
-						<br />
-						<Typography
-							variant="caption"
-							color="text.secondary"
-							component="time"
-							dateTime={note.createdAt}
-							aria-label={`Created on ${formatDate(note.createdAt)}`}
-						>
-							{formatDate(note.createdAt)}
-						</Typography>
-					</>
-				}
-				aria-describedby={`note-text-${note.id}`}
-			/>
-		</ListItem>
-	));
 
 	return (
 		<Container maxWidth="md" sx={{ my: 4 }} component="main">
