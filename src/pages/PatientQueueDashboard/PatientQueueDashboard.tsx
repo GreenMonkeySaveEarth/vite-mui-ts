@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Container, Typography, Table, TableBody, TableCell, TableHead, TableRow, Button, Box } from '@mui/material';
 import { patientsSeed } from './mockPatients';
 import { Patient } from './types';
@@ -7,11 +7,13 @@ const PatientQueueDashboard: React.FC = () => {
 	const [patients, setPatients] = useState<Patient[]>(patientsSeed);
 	const [sortAscending, setSortAscending] = useState(true);
 
-	const sortPatients = () => {
-		const sorted = [...patients].sort((a, b) =>
+	const sortedPatients = useMemo(() => {
+		return [...patients].sort((a, b) =>
 			sortAscending ? a.priority - b.priority : b.priority - a.priority
 		);
-		setPatients(sorted);
+	}, [patients, sortAscending]);
+
+	const toggleSortOrder = () => {
 		setSortAscending(!sortAscending);
 	};
 
@@ -21,7 +23,7 @@ const PatientQueueDashboard: React.FC = () => {
 				Patient Queue Dashboard
 			</Typography>
 			<Box sx={{ mb: 2 }}>
-				<Button variant="contained" onClick={sortPatients}>
+				<Button variant="contained" onClick={toggleSortOrder}>
 					Sort by Priority ({sortAscending ? 'Ascending' : 'Descending'})
 				</Button>
 			</Box>
@@ -34,7 +36,7 @@ const PatientQueueDashboard: React.FC = () => {
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{patients.map((patient) => (
+					{sortedPatients.map((patient) => (
 						<TableRow
 							key={patient.id}
 							sx={{
