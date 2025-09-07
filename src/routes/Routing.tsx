@@ -5,6 +5,7 @@ import Login from '@/pages/Auth/Login';
 import Home from '@/pages/Home/Home';
 import ClinicalNotesPage from '@/pages/ClinicalNotes';
 import PatientQueueDashboard from '@/pages/PatientQueueDashboard';
+import LiveTranscriptionFeed from '@/pages/LiveTranscriptionFeed/LiveTranscriptionFeed';
 
 const Routing = () => {
   return (
@@ -14,6 +15,7 @@ const Routing = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/notes" element={<ClinicalNotesPage />} />
       <Route path="/patients" element={<PatientQueueDashboard />} />
+      <Route path="/transcription" element={<LiveTranscriptionFeed />} />
     </Routes>
   );
 };
